@@ -1,0 +1,263 @@
+{% if usuario=="Federico" %}
+    {% extends 'base.html' %}
+{% else %}
+    {% extends 'base2.html' %}
+{% endif %}
+
+{% block contenido %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<title>Reportes</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<!-- Bootstrap -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" />
+    <!-- Custom CSS -->
+	<link rel="stylesheet" href="../static/css/main.css">
+	 <!-- icono -->
+	<link rel="icon" type="image/jpeg" href="../static/logo.jpg">
+</head>
+<body class="cover" style=" background-image: url(../static/assets/img/fontt.png); ">
+		<!-- Content page -->
+<div class="messages">
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                 {% for message in messages %}
+                    <div class="alert alert-warning" role="alert">
+                        <b>{{ message }}</b>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                 {% endfor %}
+            {% endif %}
+            {% endwith %}
+        </div>
+ <div class="container-fluid" xmlns="http://www.w3.org/1999/html">
+			<div class="page-header">
+			  <h1 class="text-titles"><i class="zmdi zmdi-book zmdi-hc-fw"></i> Reporte Asistencia/Rasgos <small></small></h1>
+			</div>
+			<p class="lead">Seleccione los datos para el reporte y luego seleccione lista</p>
+		</div>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-xs-12">
+					<ul class="nav nav-tabs" style="margin-bottom: 15px;">
+					  	<li class="active"><a href="#new" data-toggle="tab">Cargar</a></li>
+					  	<li><a href="#list" data-toggle="tab">Lista</a></li>
+					</ul>
+					<div id="myTabContent" class="tab-content">
+						<div class="tab-pane fade active in" id="new">
+							<div class="container-fluid">
+								<div class="row">
+									<div class="col-xs-12 col-md-10 col-md-offset-1">
+									    <form action="/cargareporte" method="POST"  id="myForm">
+                                          	<div class="form-group">
+										        <label class="control-label">Curso</label>
+										        <select class="form-control" name="curso">
+										          <option>Primero</option>
+										          <option>Segundo</option>
+										          <option>Tercero</option>
+										            </select>
+										</div>
+											<div class="form-group">
+										        <label class="control-label">Turno</label>
+										        <select class="form-control" name="turno">
+										          <option>Primera</option>
+										          <option>Segunda</option>
+										          </select>
+										    </div>
+											<div class="form-group">
+											  <label class="control-label">Fecha Desde</label>
+											  <input class="form-control" type="date" name="fechadesde"  required>
+											</div>
+											<div class="form-group">
+											  <label class="control-label">Fecha Hasta</label>
+											  <input class="form-control" type="date" name="fechahasta"  required>
+											</div>
+											<div id="mensaje-error" style="color: red;"></div>
+											<p class="text-center">
+                  							 <button type="submit" class="btn btn-info btn-raised btn-sm"><i class="zmdi zmdi-accounts-list"></i> Listar</button>
+										    </p>
+
+									</div>
+								</div>
+							</div>
+						</div>
+						</form>
+
+					  		<div class="tab-pane fade" id="list">
+								<div class="table-responsive">
+									<form action="/generarpdf" class="form-generarpdf"  method="POST">
+									<table class="table table-hover text-center" border=1>
+										<thead>
+											<tr>
+												<th class="text-center">#</th>
+												<th class="text-center">Nombre</th>
+												<th class="text-center">Curso</th>
+												<th class="text-center">Sección</th>
+												<th class="text-center">Fecha</th>
+												<th class="text-center">Motivo</th>
+												<th class="text-center">Operación</th>
+											</tr>
+										</thead>
+										<tbody>
+											 {% for elemento in ausencias %}
+											 <form class="form-generarpdf"  action="/generarpdf" method="post">
+        										<input type="hidden" name="nom" value="{{ elemento.5 }}">
+											<tr id="fila-{{ loop.index }}">
+												<td>{{ loop.index }}</td>
+												<td>{{ elemento.5 }}</td>
+												<td>{{ elemento.6 }}</td>
+												<td>{{ elemento.7 }}</td>
+												<td>{{ elemento.1 }}</td>
+												<td> AUSENCIA </td>
+												<td>
+													<button type="submit" class="btn btn-success btn-raised btn-xs imprimir-btn"><i class="zmdi zmdi-print"></i> Imprimir</button>
+												</td>
+
+											</tr>
+											 </form>
+											{% endfor %}
+										</tbody>
+										<tbody>
+											 {% for fila in rasgos %}
+											 <form class="form-generarpdf" action="/generarpdf" method="post">
+        										<input type="hidden" name="nom" value="{{ fila.1 }}">
+											<tr id="fila-{{ loop.index + ausencias|length }}">
+												<td>{{ loop.index + ausencias|length }}</td>
+												<td>{{ fila.1 }}</td>
+												<td>{{ fila.2}}</td>
+												<td>{{ fila.3 }}</td>
+												<td>{{ fila.0 }}</td>
+												<td> RASGO </td>
+												<td> <button type="submit" class="btn btn-success btn-raised btn-xs imprimir-btn"><i class="zmdi zmdi-print"></i> Imprimir</button></td>
+											</tr>
+											 </form>
+											{% endfor %}
+										</tbody>
+								</table>
+									</form>
+	<!--								<ul class="pagination pagination-sm">
+										<li class="disabled"><a href="#!">«</a></li>
+										<li class="active"><a href="#!">1</a></li>
+										<li><a href="#!">2</a></li>
+										<li><a href="#!">3</a></li>
+										<li><a href="#!">4</a></li>
+										<li><a href="#!">5</a></li>
+										<li><a href="#!">»</a></li>
+										</ul>-->
+							</div>
+					  	</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Notifications area -->
+	<section class="full-box Notifications-area">
+		<div class="full-box Notifications-bg btn-Notifications-area"></div>
+		<div class="full-box Notifications-body">
+			<div class="Notifications-body-title text-titles text-center">
+				Notifications <i class="zmdi zmdi-close btn-Notifications-area"></i>
+			</div>
+			<div class="list-group">
+			  	<div class="list-group-item">
+				    <div class="row-action-primary">
+				      	<i class="zmdi zmdi-alert-triangle"></i>
+				    </div>
+				    <div class="row-content">
+				      	<div class="least-content">17m</div>
+				      	<h4 class="list-group-item-heading">Tile with a label</h4>
+				      	<p class="list-group-item-text">Donec id elit non mi porta gravida at eget metus.</p>
+				    </div>
+			  	</div>
+			  	<div class="list-group-separator"></div>
+			  	<div class="list-group-item">
+				    <div class="row-action-primary">
+				      	<i class="zmdi zmdi-alert-octagon"></i>
+				    </div>
+				    <div class="row-content">
+				      	<div class="least-content">15m</div>
+				      	<h4 class="list-group-item-heading">Tile with a label</h4>
+				      	<p class="list-group-item-text">Donec id elit non mi porta gravida at eget metus.</p>
+				    </div>
+			  	</div>
+			  	<div class="list-group-separator"></div>
+				<div class="list-group-item">
+				    <div class="row-action-primary">
+				      	<i class="zmdi zmdi-help"></i>
+				    </div>
+				    <div class="row-content">
+				      	<div class="least-content">10m</div>
+				      	<h4 class="list-group-item-heading">Tile with a label</h4>
+				      	<p class="list-group-item-text">Maecenas sed diam eget risus varius blandit.</p>
+				    </div>
+				</div>
+			  	<div class="list-group-separator"></div>
+			  	<div class="list-group-item">
+				    <div class="row-action-primary">
+				      	<i class="zmdi zmdi-info"></i>
+				    </div>
+				    <div class="row-content">
+				      	<div class="least-content">8m</div>
+				      	<h4 class="list-group-item-heading">Tile with a label</h4>
+				      	<p class="list-group-item-text">Maecenas sed diam eget risus varius blandit.</p>
+				    </div>
+			  	</div>
+			</div>
+
+		</div>
+	</section>
+
+	<!-- Dialog help -->
+	<div class="modal fade" tabindex="-1" role="dialog" id="Dialog-Help">
+	  	<div class="modal-dialog" role="document">
+		    <div class="modal-content">
+			    <div class="modal-header">
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			    	<h4 class="modal-title">Help</h4>
+			    </div>
+			    <div class="modal-body">
+			        <p>
+			        	Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nesciunt beatae esse velit ipsa sunt incidunt aut voluptas, nihil reiciendis maiores eaque hic vitae saepe voluptatibus. Ratione veritatis a unde autem!
+			        </p>
+			    </div>
+		      	<div class="modal-footer">
+		        	<button type="button" class="btn btn-primary btn-raised" data-dismiss="modal"><i class="zmdi zmdi-thumb-up"></i> Ok</button>
+		      	</div>
+		    </div>
+	  	</div>
+	</div>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $(".imprimir-btn").click(function () {
+            // Obtener el formulario padre
+            var form = $(this).closest("form.form-generarpdf");
+
+            // Realizar la acción del formulario (puedes enviar datos al servidor aquí si es necesario)
+            form.submit();
+
+            // Ocultar o eliminar la fila después de enviar el formulario
+            var rowId = form.closest("tr").attr("id");
+            console.log("ID de la fila:", rowId);
+            $("#" + rowId).hide(); // O puedes usar remove() para eliminar la fila completamente
+        });
+    });
+</script>
+
+    <!--====== Scripts -->
+	<script src="../static/js/jquery-3.1.1.min.js"></script>
+	<script src="../static/js/sweetalert2.min.js"></script>
+	<script src="../static/js/bootstrap.min.js"></script>
+	<script src="../static/js/material.min.js"></script>
+	<script src="../static/js/ripples.min.js"></script>
+	<script src="../static/js/jquery.mCustomScrollbar.concat.min.js"></script>
+	<script src="../static/js/main.js"></script>
+	<script>
+		$.material.init();
+	</script>
+</body>
+</html>
+{% endblock %}
